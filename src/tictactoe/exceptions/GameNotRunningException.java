@@ -1,4 +1,4 @@
-package exceptions;
+package tictactoe.exceptions;
 
 /**
  * Exception when the Game is not running

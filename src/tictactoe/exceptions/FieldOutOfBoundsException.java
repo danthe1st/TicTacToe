@@ -1,4 +1,4 @@
-package exceptions;
+package tictactoe.exceptions;
 
 /**
  * Exception when a field does not exist

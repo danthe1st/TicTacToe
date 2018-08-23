@@ -1,23 +1,28 @@
-package gui;
+package tictactoe.core;
 
-import core.Game;
-import exceptions.AlreadyBoundException;
-import exceptions.GameNotRunningException;
+import tictactoe.Main;
+import tictactoe.exceptions.AlreadyBoundException;
+import tictactoe.exceptions.GameNotRunningException;
+import tictactoe.exceptions.GameRunningException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.jetbrains.annotations.NotNull;
+
+import java.net.URL;
 
 /**
  * class for the GUI of the Game
@@ -27,16 +32,23 @@ public class GUI extends Application {
     private final Game theGame;
     private boolean player;
     private Rectangle[][] fieldRects;
-
+    private ImagePattern player1ImgPattern;
+    private ImagePattern player2ImgPattern;
     /**
      * no-args-constructor for {@link Application}
      */
     public GUI(){
         theGame=Game.getGame();
         player=false;
+        player1ImgPattern=getPattern("resc/pl1img.png");
+        player2ImgPattern=getPattern("resc/pl2img.png");
 
     }
-
+    private static ImagePattern getPattern(String path){
+        URL resource = Main.class.getResource(path);
+        Image player1Img=new Image(resource.toString());
+        return new ImagePattern(player1Img);
+    }
     @Override
     public void start(@NotNull Stage primaryStage){
         Rectangle2D visBounds=getScreenBounds();
@@ -101,25 +113,37 @@ public class GUI extends Application {
             theGame.setField(x,y,player);
             player=!player;
             reloadField(x,y);
-            Boolean winner=theGame.getWinner();
-            if (winner!=null){
-                String winnerString;
-                if (!winner){
-                    winnerString="Player 1";
-                }else {
-                    winnerString="Player 2";
-                }
+            if (!theGame.isRunning()){
+                Boolean winner=theGame.getWinner();
 
-                Alert alert=new Alert(Alert.AlertType.INFORMATION,winnerString+" won!");
-                alert.showAndWait();
-                theGame.reset();
-                reloadAll();
+                if (winner==null){
+                    Alert alert=new Alert(Alert.AlertType.INFORMATION,"The game ends without a winner!");
+                    alert.showAndWait();
+                    theGame.reset();
+                    reloadAll();
+                }
+                else {
+                    String winnerString;
+                    if (!winner){
+                        winnerString="Player 1";
+                    }else {
+                        winnerString="Player 2";
+                    }
+
+                    Alert alert=new Alert(Alert.AlertType.INFORMATION,winnerString+" won!");
+                    alert.showAndWait();
+                    theGame.reset();
+                    reloadAll();
+                }
             }
         }catch (AlreadyBoundException e){
             Alert alert=new Alert(Alert.AlertType.ERROR,"This field is already in use");
             alert.show();
         }catch (GameNotRunningException e){
             Alert alert=new Alert(Alert.AlertType.ERROR,"This game is not running - press 'r' to restart the Game!");
+            alert.show();
+        } catch (GameRunningException e) {
+            Alert alert=new Alert(Alert.AlertType.ERROR,"Unknown Error");
             alert.show();
         }
     }
@@ -136,10 +160,12 @@ public class GUI extends Application {
             paint=Color.WHITE;
         }
         else if (field){
-            paint=Color.RED;
+            //paint=Color.RED;
+            paint=player2ImgPattern;
         }
         else {
-            paint=Color.BLUE;
+            //paint=Color.BLUE;
+            paint=player1ImgPattern;
         }
         fieldRects[x][y].setFill(paint);
     }

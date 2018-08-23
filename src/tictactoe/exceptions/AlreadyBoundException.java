@@ -1,4 +1,4 @@
-package exceptions;
+package tictactoe.exceptions;
 
 /**
  * Exception-class when a field is already bound

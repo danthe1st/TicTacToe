@@ -1,9 +1,10 @@
-package core;
+package tictactoe.core;
 
 
-import exceptions.AlreadyBoundException;
-import exceptions.FieldOutOfBoundsException;
-import exceptions.GameNotRunningException;
+import tictactoe.exceptions.AlreadyBoundException;
+import tictactoe.exceptions.FieldOutOfBoundsException;
+import tictactoe.exceptions.GameNotRunningException;
+import tictactoe.exceptions.GameRunningException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +16,7 @@ public class Game {
     @Nullable
     private static Game theGame =null;
     private boolean running=true;
+    private Boolean winner=null;
     /**
         only via {@link Game#getGame()}
      */
@@ -58,6 +60,17 @@ public class Game {
 
         }
         fields[x][y]=player;
+
+
+        loadWinner();
+        for (Boolean[] field : fields) {
+            for (Boolean aField : field) {
+                if (aField == null) {
+                    return;
+                }
+            }
+        }
+        running=false;
     }
 
     /**
@@ -66,6 +79,7 @@ public class Game {
     public void reset(){
         fields=new Boolean[3][3];
         running=true;
+        winner=null;
     }
 
     /**
@@ -92,16 +106,28 @@ public class Game {
     public Boolean getField(int x,int y) throws ArrayIndexOutOfBoundsException{
         return fields[x][y];
     }
-
     /**
-     * gets the current winner
+     * loads the current winner
      * null ... not bound yet<br>
      * false ... Player 1<br>
      * true ... Player 2<br>
+     * @throws GameRunningException if the Game is running
      * @return the winner represented by a {@link Boolean} or null if the game is not over yet
      */
     @Nullable
-    public Boolean getWinner(){
+    public Boolean getWinner() throws GameRunningException {
+        if (running){
+            throw new GameRunningException();
+        }
+        return winner;
+    }
+    /**
+     * loads the current winner
+     * null ... not bound yet<br>
+     * false ... Player 1<br>
+     * true ... Player 2<br>
+     */
+    private void loadWinner(){
         bigLoop:for (Boolean[] field : fields) {
             Boolean winner = field[0];
             if (winner == null) {
@@ -113,7 +139,8 @@ public class Game {
                 }
             }
             running = false;
-            return winner;
+            this.winner=winner;
+            return;
         }
         bigLoop:for (int x = 0; x < fields.length; x++) {
             Boolean winner=fields[0][x];
@@ -127,7 +154,8 @@ public class Game {
                 }
             }
             running=false;
-            return winner;
+            this.winner=winner;
+            return;
         }
         Boolean winner=fields[0][0];
         if (winner!=null){
@@ -139,12 +167,14 @@ public class Game {
             }
             if (winner!=null){
                 running=false;
-                return winner;
+                this.winner=winner;
+                return;
             }
         }
         winner=fields[fields.length-1][0];
         if (winner==null){
-            return null;
+            this.winner=null;
+            return;
         }
 
         for (int xy = 0; xy < fields.length; xy++) {
@@ -156,6 +186,10 @@ public class Game {
         if (winner!=null){
             running=false;
         }
-        return winner;
+        this.winner=winner;
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 }
