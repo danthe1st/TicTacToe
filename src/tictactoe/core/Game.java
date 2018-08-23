@@ -176,7 +176,6 @@ public class Game {
             this.winner=null;
             return;
         }
-
         for (int xy = 0; xy < fields.length; xy++) {
             if (fields[fields.length - xy - 1][xy] == null || winner.booleanValue() != fields[fields.length - xy - 1][xy].booleanValue()) {
                 winner = null;
